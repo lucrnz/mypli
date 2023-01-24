@@ -18,10 +18,6 @@ for entry in ['SECRET_KEY', 'SSH_KEY_PRIV', 'SSH_KEY_PUB',
               'SSH_KNOW_HOSTS', 'DEBUG', 'HOST', 'PORT', 'USER_ID', 'GROUP_ID']:
     safe_env.pop(entry, None)
 
-# Alter home directory, this is needed in the Docker container.
-if exists("/.insidedocker"):
-    safe_env['HOME'] = getcwd()
-
 @app.route('/')
 def index():
     meme_url = "https://images7.memedroid.com/images/UPLOADED501/57f66e907bb62.jpeg"
