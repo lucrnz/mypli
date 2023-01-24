@@ -23,9 +23,9 @@ First make sure you have decent Python version. I am running Python 3.10.9
 
     python --version
 
-Create a `venv`:
+Create a `venv` and activate it:
 
-    python -m venv .venv
+    python -m venv .venv && source .venv/bin/activate
 
 Install packages
 
