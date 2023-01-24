@@ -7,10 +7,15 @@ RUN apk add --no-cache openssh-client git
 ARG USER_ID
 ARG GROUP_ID
 
-RUN mkdir /app && \
-    addgroup --gid $GROUP_ID -S appgroup && \
-    adduser --home /app --uid $USER_ID -S appuser -G appgroup && \
-    chown $USER_ID:$GROUP_ID /app
+RUN touch /.insidedocker
+
+RUN mkdir /app
+
+RUN getent group $GROUP_ID || addgroup --gid $GROUP_ID -S appgroup
+
+RUN getent user $GROUP_ID || adduser --home /app --uid $USER_ID -S appuser -G appgroup
+
+RUN chown $USER_ID:$GROUP_ID /app
 
 USER appuser
 WORKDIR /app
