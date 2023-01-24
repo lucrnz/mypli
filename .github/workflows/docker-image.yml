@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag api-lucdev:$(date +%s)
+      run: docker build . --file Dockerfile --tag api-lucdev:$(date +%s) --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
