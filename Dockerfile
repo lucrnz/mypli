@@ -13,7 +13,7 @@ RUN mkdir /app
 
 RUN getent group $GROUP_ID || addgroup --gid $GROUP_ID -S appgroup
 
-RUN getent user $GROUP_ID || adduser --home /app --uid $USER_ID -S appuser -G appgroup
+RUN getent user $USER_ID || adduser --home /app --uid $USER_ID -S appuser -G appgroup
 
 RUN chown $USER_ID:$GROUP_ID /app
 
