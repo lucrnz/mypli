@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  api:
+    build:
+      context: .
+    restart: always
+    environment:
+      - ENV=${ENV}
+      - PORT=8080
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS}
+      - GUNICORN_THREADS=${GUNICORN_THREADS}
+    ports:
+      - 8080:8080
