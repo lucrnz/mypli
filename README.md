@@ -3,9 +3,14 @@
 
 ## Building
 
+Setup environent config and secrets:
+	cp .env.example .env
+
+Edit the `.env` file accordingly.
+
 Use docker.
 
-	docker compose up
+	docker compose build --no-cache && docker compose up
 
 ## Personal usage
 
