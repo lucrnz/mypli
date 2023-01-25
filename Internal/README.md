@@ -8,7 +8,7 @@ Create a `.env` file
 
     cp .env.example .env
 
-Add any flag you need to use:
+Add or change any flag you need to use:
 
 `DEBUG` enables Flask debug mode if set to `1`
 `ENV` can be `production` or `development`
@@ -31,12 +31,10 @@ Install packages
 
     pip install wheel && pip install -r requirements.txt
 
-Launch the api:
+Launch the API:
 
-    DEBUG=1 ENV=development ./scripts/launch.sh
+    ./scripts/launch.sh
 
-Launch the api **production mode**:
+**Note**: You should run it as the same user that you are using to manager your docker containers in your VPS.
 
-    HOST=localhost ./scripts/launch.sh
-
-You may change the .env file to set a custom port
+You may change the .env file to set a custom port, the recommended host is always `localhost` or any that can **only** recieve commands from the *External* API.
