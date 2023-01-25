@@ -1,8 +1,13 @@
-from os import getenv, environ
-from os.path import exists, join, abspath
+from os import getenv
+from os.path import exists
 from flask import Flask, jsonify, request, Response
-from typing import Dict
+from get_safe_env import get_safe_env
+from get_service_path import get_service_path
+from process_to_api import process_to_api
+from validate_auth import validate_auth
+from validate_service_path import validate_service_path
 
+import requests
 import subprocess
 app = Flask(__name__)
 
@@ -18,31 +23,11 @@ if len(getenv('SECRET_KEY') or '') == 0:
     raise Exception(
         'Environment variable SECRET_KEY is not a defined.')
 
-safe_env = environ.copy()
-
-for entry in ['SECRET_KEY', 'SSH_KEY_PRIV', 'SSH_KEY_PUB',
-              'SSH_KNOW_HOSTS', 'DEBUG', 'HOST', 'PORT', 'USER_ID', 'GROUP_ID', 'INTERNAL_API_PORT']:
-    safe_env.pop(entry, None)
-
-
-def get_service_path(service_name: str) -> str:
-    return abspath(join(services_path, service_name))
-
-
-def validate_service_path(service_path: str) -> tuple[bool, Response]:
-    if not service_path.startswith(services_path) or not exists(service_path):
-        return (False, Response('{err_msg: "Service not found"}', status=404, mimetype='application/json'))
-    else:
-        return (True, None)
-
+safe_env = get_safe_env()
 
 def get_unauthorized_response() -> Response:
     app.logger.info('User not authorized')
     return Response('{err_msg: "Not authorized"}', status=401, mimetype='application/json')
-
-
-def validate_auth(headers: Dict[str, str]) -> bool:
-    return headers['KEY'] == getenv('SECRET_KEY')
 
 
 @app.route('/')
@@ -56,39 +41,42 @@ def service_pull(service):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
 
-    service_path = get_service_path(str(service))
-    (service_path_valid, service_path_response) = validate_service_path(service_path)
+    service_path = get_service_path(str(service), services_path)
+    (service_path_valid, service_path_response) = validate_service_path(service_path, services_path)
 
-    if not service_path_valid and service_path_response != None:
+    if not service_path_valid and service_path_response is not None:
         return service_path_response
 
-    cmd = subprocess.run(["git", "pull", "origin", "main"], universal_newlines=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=service_path, env=safe_env)
-    res = {}
-    res["returncode"] = cmd.returncode
-    if len(cmd.stdout) > 0:
-        res["stdout"] = cmd.stdout
+    return process_to_api(['git', 'pull', 'origin', 'main'], service_path, safe_env)
 
-    if len(cmd.stderr) > 0:
-        res["stderr"] = cmd.stderr
-    return jsonify(res)
-
-
-@app.route('/service/<service>/rebuild')
-def service_rebuild(service):
+@app.route('/service/<service>/deploy')
+def service_deploy(service):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
 
-    service_path = get_service_path(str(service))
-    (service_path_valid, service_path_response) = validate_service_path(service_path)
+    service_path = get_service_path(str(service), services_path)
+    (service_path_valid, service_path_response) = validate_service_path(service_path, services_path)
 
     if not service_path_valid and service_path_response != None:
         return service_path_response
 
-    res = {}
-    res['exists'] = True
-    return jsonify(res)
+    err_response: Response | None = None
+    api_response: requests.Response | None = None
+
+    try:
+        api_response = requests.get(
+            f"{getenv('INTERNAL_API_URL')}/service/{service}/deploy")
+    except BaseException as e:
+        json_dict = {}
+        json_dict["err_msg"] = f"Internal API error: {e}"
+        err_response = jsonify(json_dict)
+        err_response.status_code = 500
+    finally:
+        if err_response is None and api_response is not None:
+            return Response(api_response.text, api_response.status_code,None, None, api_response.headers['content-type'])
+        else:
+            return err_response
 
 
 if __name__ == '__main__':
-    app.run(host=getenv('HOST') or '::', port=getenv('PORT') or '8080')
+    app.run(host=getenv('HOST') or '::', port=getenv('PORT') or '7878')
