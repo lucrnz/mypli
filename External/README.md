@@ -48,4 +48,4 @@ Once you done that, you can delete those files.
 
 Use docker.
 
-	docker compose build --no-cache && docker compose up
+	./scripts/launch.sh
