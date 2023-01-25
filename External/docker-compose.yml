@@ -19,10 +19,9 @@ services:
       - SSH_KEY_PRIV=${SSH_KEY_PRIV}
       - SSH_KEY_PUB=${SSH_KEY_PUB}
       - SSH_KNOW_HOSTS=${SSH_KNOW_HOSTS}
-      - INTERNAL_API_PORT=${INTERNAL_API_PORT}
+      - INTERNAL_API_URL=${INTERNAL_API_URL}
     ports:
-      - ${PORT}:${PORT}
+      - ${HOST}:${PORT}:${PORT}
     volumes:
+      - ./src:/app/src
       - ${SRV_PATH}:/app/srv
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
