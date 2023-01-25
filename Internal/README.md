@@ -13,6 +13,7 @@ Add or change any flag you need to use:
 `DEBUG` enables Flask debug mode if set to `1`
 `ENV` can be `production` or `development`
 `SRV_PATH` should contain the route to the services folder
+`URL_SUFFIX` every API endpoint will be prefixed by this.
 
 `GUNICORN_WORKERS` only valid on **production** mode, sets the amount of workers
 `GUNICORN_THREADS` only valid on **production** mode, sets the amount of threads
