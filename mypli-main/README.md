@@ -1,12 +1,16 @@
-## api.lucdev.net: External API
-[https://api.lucdev.net](https://api.lucdev.net)
+## mypli-main
 
-This api faces the WWW, and it is responsible for mediating external requests and internal requests (if necessary).
+This is the main service, it handles requests 
 
-## Intent
-Everything that can be done within a container, will be done this way.
+All tasks will be completed using containers. To manage the containers themselves, the internal API will be called.
 
-Tasks that involve managing containers itself, will require calling the internal API.
+## Routes
+
+| Route | Method | Description
+| --- | --- | --- |
+| `/services/{service_name}/pull` | `GET` | This triggers the `pull` action |
+| `/services/{service_name}/deploy` | `GET` | This triggers the `deploy` action. |
+
 
 ## Configuration
 
@@ -15,7 +19,7 @@ Setup environent config and secrets:
 
 Edit the `.env` file accordingly.
 
-> 💡 **Info**: Any PATH is relative to this directory, so if you want to go back to the root of the project you will need to do it like this: ../ or just specify an absolute path.
+> 💡 **Info**: For PATHS: To go back to the root project folder, use "../" or an absolute path. Keep in mind that all paths are based on this current directory.
 
 | Variable | Description |
 | --- | --- |

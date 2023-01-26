@@ -1,10 +1,12 @@
-## api.lucdev.net
-🚀  API for managing my personal website/services
+## mypli
+🚀  API for automatic remote deployment
 
 ## Infraestructure
-Check the [External api](./External) for the code that goes directly to the WWW and it is contained within Docker.
+Check the [main service](./mypli-main/) for the code that goes directly to the web and it is contained within Docker.
 
-Check the [Internal api](./Internal/) for the code that runs directly on my VPS and only listens to the "External api" requests.
+Check the [internal service](./mypli-internal/) for the code that runs directly on the server and has more privileges.
+
+Both services need to be running for the program to work correctly.
 
 ## Personal usage
 

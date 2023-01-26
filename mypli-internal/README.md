@@ -1,6 +1,8 @@
-## api.lucdev.net: 🛡️ Internal API
+## mypli-internal
 
-This code is responsible for managing more sensible tasks such as rebuilding docker containers.
+This service is responsible for managing more sensible tasks such as rebuilding docker containers.
+
+It generally has more privileges over the system compared to `main` service.
 
 ## ⚙️ Configuration
 
