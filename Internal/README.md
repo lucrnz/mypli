@@ -1,8 +1,8 @@
-## api.lucdev.net: Internal API
+## api.lucdev.net: 🛡️ Internal API
 
 This code is responsible for managing more sensible tasks such as rebuilding docker containers.
 
-## Configuration
+## ⚙️ Configuration
 
 Create a `.env` file
 
@@ -10,13 +10,17 @@ Create a `.env` file
 
 Add or change any flag you need to use:
 
-`DEBUG` enables Flask debug mode if set to `1`
-`ENV` can be `production` or `development`
-`SRV_PATH` should contain the route to the services folder
-`URL_SUFFIX` every API endpoint will be prefixed by this.
+> 💡 **Info**: Any PATH is relative to the `src` directory, so if you want to go back to the root of the project you will need to do it like this: ../../ or just specify an absolute path.
 
-`GUNICORN_WORKERS` only valid on **production** mode, sets the amount of workers
-`GUNICORN_THREADS` only valid on **production** mode, sets the amount of threads
+| Variable | Description |
+| --- | --- |
+| `DEBUG` | Enables Flask debug mode if set to `1` |
+|  `ENV` | Sets the mode, can be `production` or `development` |
+| `SRV_PATH` | Contains the route to the services folder |
+| `URL_SUFFIX` | Every API endpoint will be prefixed by this. Just adds a bit more of security. |
+| `INTENT_PATH` | Path to a shared folder with the external api, used to validate the authenticity of requests |
+| `GUNICORN_WORKERS` | Sets the amount of gunicorn workers |
+| `GUNICORN_THREADS` | Sets the amount of gunicorn threads |
 
 ## Build and launch
 
