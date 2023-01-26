@@ -12,6 +12,7 @@ services:
       - ENV=${ENV}
       - DEBUG=${DEBUG}
       - SRV_PATH=/app/srv
+      - INTENT_PATH=/app/intent
       - PORT=${PORT}
       - GUNICORN_WORKERS=${GUNICORN_WORKERS}
       - GUNICORN_THREADS=${GUNICORN_THREADS}
@@ -25,3 +26,4 @@ services:
     volumes:
       - ./src:/app/src
       - ${SRV_PATH}:/app/srv
+      - ${INTENT_PATH}:/app/intent
