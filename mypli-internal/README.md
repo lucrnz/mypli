@@ -4,7 +4,7 @@ This service is responsible for managing more sensible tasks such as rebuilding 
 
 It generally has more privileges over the system compared to `main` service.
 
-## ⚙️ Configuration
+## Set-up and configuration
 
 Create a `.env` file
 

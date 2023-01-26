@@ -11,8 +11,15 @@ All tasks will be completed using containers. To manage the containers themselve
 | `/services/{service_name}/pull` | `GET` | This triggers the `pull` action |
 | `/services/{service_name}/deploy` | `GET` | This triggers the `deploy` action. |
 
+## What is a service? Where are they?
 
-## Configuration
+A service is a folder on your server that holds, usually a git repository.
+
+A service usually has a config for `pulling`, this action usually implies updating to the latest version available. An example would be a git pull.
+
+Another action that a service can have is `deploy`, this action implies updating a service on the server to make it available. Usually implies either restarting some `systemd` service or using a container system such as `docker`.
+
+## Set-up and configuration
 
 Setup environent config and secrets:
 	cp .env.example .env
