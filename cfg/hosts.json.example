@@ -1,0 +1,9 @@
+[
+    {
+        "Name": "myvps",
+        "Host": "coolstuff.tech",
+        "User": "operator",
+        "Port": "2050",
+        "Services": "/home/operator/srv"
+    }
+]
