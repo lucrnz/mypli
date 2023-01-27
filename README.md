@@ -44,9 +44,9 @@ We need to generate the known_hosts file, for every domain the API will connect:
 
 > ✏️ Do not copy paste! Replace those example domains with your services.
 
-	ssh-keyscan -f key service-one.myself.tech >> cfg/known_hosts
-	ssh-keyscan -f key service-two.myself.tech >> cfg/known_hosts
-	ssh-keyscan -f key service-three.myself.tech >> cfg/known_hosts
+	ssh-keyscan -f cfg/key service-one.myself.tech >> cfg/known_hosts
+	ssh-keyscan -f cfg/key -p 2020 service-two.myself.tech  >> cfg/known_hosts
+	ssh-keyscan -f cfg/key -p 3050 service-three.myself.tech >> cfg/known_hosts
 
 Do not forget to add the key.pub to the server you are managing.
 

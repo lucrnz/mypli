@@ -1,10 +1,8 @@
 from flask import jsonify, Response
-import subprocess
+from remote_bash import remote_bash
 
-
-def process_to_api(process_and_args: list[str], cwd: str, env: dict[str, str]) -> Response:
-    cmd = subprocess.run(process_and_args, universal_newlines=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
+def remote_bash_to_api(bash_code: str, host_name : str, host_dir : str, service_name : str) -> Response:
+    cmd = remote_bash(host_name, bash_code=f'cd {host_dir}/{service_name}\n{bash_code}')
     res = {}
     res["returncode"] = cmd.returncode
     if len(cmd.stdout) > 0:

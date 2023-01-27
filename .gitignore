@@ -1,5 +1,6 @@
 # Project specific
 cfg/*
+!cfg/hosts.json.example
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
