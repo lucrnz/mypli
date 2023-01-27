@@ -14,21 +14,6 @@ app = Flask(__name__)
 
 app.config['DEBUG'] = (getenv('DEBUG') or '0').lower() in ['1', 'true']
 
-services_path = getenv('SRV_PATH') or ''
-intent_path = getenv('INTENT_PATH') or ''
-
-if not exists(services_path):
-    raise Exception(
-        'Environment variable SRV_PATH is not a valid path.')
-else:
-    services_path = abspath(services_path)
-
-if not exists(intent_path):
-    raise Exception(
-        'Environment variable INTENT_PATH is not a valid path.')
-else:
-    intent_path = abspath(intent_path)
-
 if len(getenv('SECRET_KEY') or '') == 0:
     raise Exception(
         'Environment variable SECRET_KEY is not a defined.')
@@ -40,15 +25,8 @@ def get_unauthorized_response() -> Response:
     app.logger.info('Request not authorized')
     return Response('{err_msg: "Not authorized"}', status=401, mimetype='application/json')
 
-
-@app.route('/')
-def index():
-    meme_url = "https://images7.memedroid.com/images/UPLOADED501/57f66e907bb62.jpeg"
-    return f'<html><body><img src="{meme_url}" style="max-width: 100%"/></body></html>'
-
-
-@app.route('/service/<service>/pull')
-def service_pull(service):
+@app.route('/<hostname>/<service>/pull')
+def service_pull(hostname, service):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
 
@@ -62,8 +40,8 @@ def service_pull(service):
     return process_to_api(['git', 'pull', 'origin', 'main'], service_path, safe_env)
 
 
-@app.route('/service/<service>/deploy')
-def service_deploy(service):
+@app.route('/<hostname>/<service>/deploy')
+def service_deploy(hostname : str, service : str):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
 
