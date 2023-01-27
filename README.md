@@ -42,11 +42,20 @@ This key will be used to connect to hosts, do not add a password to it, when ask
 
 We need to generate the known_hosts file, for every domain the API will connect:
 
-> ✏️ Do not copy paste! Replace those example domains with your services.
+> ✏️ Do not copy paste! Replace those example domains (and ports) with your services.
 
 	ssh-keyscan -f cfg/key service-one.myself.tech >> cfg/known_hosts
 	ssh-keyscan -f cfg/key -p 2020 service-two.myself.tech  >> cfg/known_hosts
 	ssh-keyscan -f cfg/key -p 3050 service-three.myself.tech >> cfg/known_hosts
+
+If the above commands don't work for some reason, then try connecting using:
+
+	chmod 600 cfg/key
+	ssh user@yourhost -P 3050 -i cfg/key
+
+Then copy your `known_hosts`:
+
+	cp ~/.ssh/known_hosts cfg/known_hosts
 
 Do not forget to add the key.pub to the server you are managing.
 
