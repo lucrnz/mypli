@@ -5,8 +5,21 @@
 
 | Route | Method | Description
 | --- | --- | --- |
-| `/services/{service_name}/pull` | `GET` | This triggers the `pull` action |
-| `/services/{service_name}/deploy` | `GET` | This triggers the `deploy` action. |
+| `/{host_name}/{service_name}/{action_name}` | `GET` | This triggers the action `action_name` on the service `service_name`, at the server `host_name`. |
+
+## Response
+
+```json
+{
+	"returncode": 0,
+	"stderr": "Container test-app-api-1  Stopping\nContainer test-app-api-1  Stopping\nContainer test-app-api-1  Stopped\nContainer test-app-api-1  Removing\nContainer test-app-api-1  Removed\nNetwork test-app_default  Removing\nNetwork test-app_default  Removed\n",
+	"stdout": ""
+}
+```
+
+The field `returncode` indicates the status of the command, if it's zero: there were no errors, if it's greater than zero, there were errors.
+
+The fields `stderr` `stdout` contains the output of the command. You may check them for debugging.
 
 ## What is a service? Where are they?
 
@@ -15,6 +28,28 @@ A service is a folder on your server that holds, usually a git repository.
 A service usually has a config for `pulling`, this action usually implies updating to the latest version available. An example would be a git pull.
 
 Another action that a service can have is `deploy`, this action implies updating a service on the server to make it available. Usually implies either restarting some `systemd` service or using a container system such as `docker`.
+
+Ultimately you as a developer can configure what actions and 
+
+## How to define an actions file
+
+In your service folder, the file `mypli.yml` is excepted.
+
+This file looks like this:
+
+```yaml
+pull:
+  - git pull origin main
+
+deploy:
+  - docker compose down --volumes
+  - docker compose build --no-cache
+  - docker compose up -d
+```
+
+In this case you can replace `pull` with any `action_name`, any command on the list **depends that former command executed correctly**. Any error will stop the pipeline.
+
+You may define as many actions as you need.
 
 ## Set-up and configuration
 
