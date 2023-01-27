@@ -3,7 +3,11 @@ from flask import Flask, jsonify, request, Response
 from validate_auth import validate_auth
 from validate_service import validate_service
 from get_host_dir import get_host_dir
-from remote_bash_to_api import remote_bash_to_api
+from process_result_to_api import process_result_to_api
+from remote_bash import remote_bash
+from wrap_bash_code_service import wrap_bash_code_service
+from subprocess import CompletedProcess
+from yaml import safe_load as yaml_load
 
 app = Flask(__name__)
 
@@ -23,8 +27,20 @@ def get_service_not_found_response() -> Response:
     return Response('{err_msg: "Service not found"}', status=404, mimetype='application/json')
 
 
-@app.route('/<host_name>/<service_name>/pull')
-def service_pull(host_name: str, service_name: str):
+def get_service_invalid_yml() -> Response:
+    return Response('{err_msg: "Service mypli.yml not found"}', status=404, mimetype='application/json')
+
+
+def get_service_invalid_action(action_name: str) -> Response:
+    res = {}
+    res['err_msg'] = f"Service action {action_name} not found"
+    res_flask = jsonify(res)
+    res_flask.status_code = 404
+    return res_flask
+
+
+@app.route('/<host_name>/<service_name>/<action_name>')
+def service_pull(host_name: str, service_name: str, action_name: str):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
 
@@ -33,20 +49,20 @@ def service_pull(host_name: str, service_name: str):
     if not validate_service(host_name, host_dir, service_name):
         return get_service_not_found_response()
 
-    return remote_bash_to_api('git pull origin main', host_name, host_dir, service_name)
+    code = wrap_bash_code_service('cat mypli.yml', host_dir, service_name)
+    cmd_file: CompletedProcess[str] = remote_bash(host_name, code)
 
+    if cmd_file.returncode != 0 or len(cmd_file.stdout) == 0:
+        return get_service_invalid_yml()
 
-@app.route('/<host_name>/<service_name>/deploy')
-def service_deploy(host_name: str, service_name: str):
-    if not validate_auth(request.headers):
-        return get_unauthorized_response()
+    service_def = yaml_load(cmd_file.stdout)
 
-    host_dir = get_host_dir(host_name)
+    if not action_name in service_def:
+        get_service_invalid_action(action_name)
 
-    if not validate_service(host_name, host_dir, service_name):
-        return get_service_not_found_response()
-
-    return remote_bash_to_api('./scripts/deploy.sh', host_name, host_dir, service_name)
+    code = wrap_bash_code_service(' && '.join(
+        service_def[action_name]), host_dir, service_name)
+    return process_result_to_api(remote_bash(host_name, code))
 
 
 if __name__ == '__main__':
