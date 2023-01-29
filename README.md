@@ -60,12 +60,8 @@ Edit the `.env` file accordingly.
 
 | Variable | Description |
 | --- | --- |
-| `ENV` | Sets the mode, can be `production` or `development` |
 | `HOST` | The host the API listens to |
 | `PORT` | The port the API listens to |
-| `DEBUG` | Enables Flask debug mode if set to `1` |
-| `GUNICORN_WORKERS` | Sets the amount of gunicorn workers |
-| `GUNICORN_THREADS` | Sets the amount of gunicorn threads |
 | `SECRET_KEY` | A password that you will have to send via a `KEY` header in the `HTTP` request |
 
 Create an SSH key for the service.
