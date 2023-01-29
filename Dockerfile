@@ -1,14 +1,21 @@
 # syntax=docker/dockerfile:1
-FROM python:3.11-alpine3.16
+FROM golang:1.19-alpine as builder
+
+RUN mkdir /build
+
+COPY . /build
+WORKDIR /build
+RUN CGO_ENABLED=0 GOOS=linux go build -o main
+
+FROM alpine:3.17
+WORKDIR /app
+
+# Grab built binary
+COPY --from=builder /build/main .
 
 # Program requirements
 RUN apk add --no-cache openssh-client
 
-WORKDIR /app
-
-COPY requirements.txt .
 COPY Dockerentry.sh .
-
-RUN pip install --no-cache-dir -r requirements.txt && rm requirements.txt
 
 ENTRYPOINT [ "./Dockerentry.sh"]
