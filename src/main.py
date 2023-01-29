@@ -20,7 +20,7 @@ if len(getenv('SECRET_KEY') or '') == 0:
 
 
 def json_err_msg(msg: str) -> str:
-    return '{"returncode": 1, "err_msg": "' + msg + '"}'
+    return '{"returncode": 1, "stderr": "API Error: ' + msg + '", "stdout": """}'
 
 
 def get_unauthorized_response() -> Response:
