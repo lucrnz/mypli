@@ -81,4 +81,4 @@ def service_pull(host_name: str, service_name: str, action_name: str):
 
 
 if __name__ == '__main__':
-    app.run(host=getenv('HOST') or '::', port=getenv('PORT') or '7878')
+    app.run(host=getenv('HOST') or '::', port=int(getenv('PORT') or '7878'))
