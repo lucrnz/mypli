@@ -19,20 +19,24 @@ if len(getenv('SECRET_KEY') or '') == 0:
         'Environment variable SECRET_KEY is not a defined.')
 
 
+def json_err_msg(msg: str) -> str:
+    return '{"returncode": 1, "err_msg": "' + msg + '"}'
+
+
 def get_unauthorized_response() -> Response:
-    return Response('{err_msg: "Not authorized"}', status=401, mimetype='application/json')
+    return Response(json_err_msg("Not authorized"), status=401, mimetype='application/json')
 
 
 def get_invalid_request_response() -> Response:
-    return Response('{err_msg: "Invalid request"}', status=400, mimetype='application/json')
+    return Response(json_err_msg("Invalid request"), status=400, mimetype='application/json')
 
 
 def get_service_not_found_response() -> Response:
-    return Response('{err_msg: "Service not found"}', status=404, mimetype='application/json')
+    return Response(json_err_msg("Service not found"), status=404, mimetype='application/json')
 
 
 def get_service_invalid_yml() -> Response:
-    return Response('{err_msg: "Service mypli.yml not found"}', status=404, mimetype='application/json')
+    return Response(json_err_msg("Service mypli.yml not found"), status=404, mimetype='application/json')
 
 
 def get_service_invalid_action(action_name: str) -> Response:
@@ -44,7 +48,7 @@ def get_service_invalid_action(action_name: str) -> Response:
 
 
 def validate_input(input_data: str) -> bool:
-    return not any(c in "!@#$%^&*()-+?_=,<>/;\'\"" for c in input_data)
+    return not any(c in "!@#$%^&*()+?=,<>/;\'\"" for c in input_data)
 
 
 @app.route('/<host_name>/<service_name>/<action_name>')
