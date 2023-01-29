@@ -23,6 +23,10 @@ def get_unauthorized_response() -> Response:
     return Response('{err_msg: "Not authorized"}', status=401, mimetype='application/json')
 
 
+def get_invalid_request_response() -> Response:
+    return Response('{err_msg: "Invalid request"}', status=400, mimetype='application/json')
+
+
 def get_service_not_found_response() -> Response:
     return Response('{err_msg: "Service not found"}', status=404, mimetype='application/json')
 
@@ -39,10 +43,17 @@ def get_service_invalid_action(action_name: str) -> Response:
     return res_flask
 
 
+def validate_input(input_data: str) -> bool:
+    return not any(c in "!@#$%^&*()-+?_=,<>/;\'\"" for c in input_data)
+
+
 @app.route('/<host_name>/<service_name>/<action_name>')
 def service_pull(host_name: str, service_name: str, action_name: str):
     if not validate_auth(request.headers):
         return get_unauthorized_response()
+
+    if not validate_input(host_name) or not validate_input(service_name) or not validate_input(action_name):
+        return get_invalid_request_response()
 
     host_dir = get_host_dir(host_name)
 
