@@ -99,3 +99,7 @@ Do not forget to add the key.pub to the server you are managing.
 🐳 Use docker.
 
 	docker compose build --no-cache && docker compose up -d
+	
+## 🛡️ Security advisory
+
+I am not an expert in software security, run this code in production at your own risk! If you find an exploit to my code **please** let me know, my email address is on my GitHub account.
