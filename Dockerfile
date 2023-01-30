@@ -5,13 +5,13 @@ RUN mkdir /build
 
 COPY . /build
 WORKDIR /build
-RUN CGO_ENABLED=0 GOOS=linux go build -o main
+RUN CGO_ENABLED=0 GOOS=linux go build -o mypli
 
 FROM alpine:3.17
 WORKDIR /app
 
 # Grab built binary
-COPY --from=builder /build/main .
+COPY --from=builder /build/mypli /usr/bin/mypli
 
 # Program requirements
 RUN apk add --no-cache openssh-client
