@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strconv"
 	"syscall"
@@ -44,6 +46,16 @@ func init() {
 	if err != nil {
 		log.Fatal("Cannot parse hosts file : " + err.Error())
 	}
+}
+
+func remoteBash(hostName string, bashCode string) (error, *exec.Cmd) {
+	cmd := exec.Command("ssh", hostName, "bash")
+	var b bytes.Buffer
+	b.Write([]byte(bashCode))
+	cmd.Stdin = &b
+	err := cmd.Run()
+
+	return err, cmd
 }
 
 func main() {
