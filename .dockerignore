@@ -1,8 +1,4 @@
 Dockerfile
-README.md
-src/__pycache__
-.venv
-venv
-key
-key.pub
-know_hosts
+*.md
+.env
+cfg/*
