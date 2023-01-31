@@ -4,16 +4,11 @@ services:
   api:
     build:
       context: .
-    restart: always
+    restart: unless-stopped
     environment:
-      - ENV=${ENV}
       - PORT=${PORT}
-      - DEBUG=${DEBUG}
-      - GUNICORN_WORKERS=${GUNICORN_WORKERS}
-      - GUNICORN_THREADS=${GUNICORN_THREADS}
       - SECRET_KEY=${SECRET_KEY}
     ports:
       - ${HOST}:${PORT}:${PORT}
     volumes:
-      - ./src:/app/src
       - ./cfg:/app/cfg
