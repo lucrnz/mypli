@@ -94,7 +94,7 @@ func remoteBash(hostName string, bashCode string) (ExecutedCommand, error) {
 	result.Stdout = stdout.Bytes()
 	result.Command = cmd
 
-	return err, result
+	return result, err
 }
 
 func main() {
