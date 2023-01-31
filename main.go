@@ -11,9 +11,11 @@ import (
 	"os/exec"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/yaml.v3"
 )
 
 type HostConfig struct {
@@ -24,7 +26,33 @@ type HostConfig struct {
 	Services string
 }
 
+type ExecutedCommand struct {
+	Stdout  []byte
+	Stderr  []byte
+	Command *exec.Cmd
+}
+
+type APIResult struct {
+	ReturnCode int    `json:"returncode"`
+	Stderr     string `json:"stderr"`
+	Stdout     string `json:"stdout"`
+}
+
 var hostsData []HostConfig
+
+func getErrorBytes(code int, message string) []byte {
+	apiResult := APIResult{}
+	apiResult.ReturnCode = code
+	apiResult.Stderr = message
+	apiResult.Stdout = ""
+	apiResultBytes, err := json.Marshal(apiResult)
+
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	return apiResultBytes
+}
 
 func init() {
 	jsonFile, err := os.Open("./cfg/hosts.json")
@@ -48,14 +76,25 @@ func init() {
 	}
 }
 
-func remoteBash(hostName string, bashCode string) (error, *exec.Cmd) {
+func remoteBash(hostName string, bashCode string) (ExecutedCommand, error) {
 	cmd := exec.Command("ssh", hostName, "bash")
 	var b bytes.Buffer
 	b.Write([]byte(bashCode))
 	cmd.Stdin = &b
-	err := cmd.Run()
 
-	return err, cmd
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	result := ExecutedCommand{}
+	result.Stderr = stderr.Bytes()
+	result.Stdout = stdout.Bytes()
+	result.Command = cmd
+
+	return err, result
 }
 
 func main() {
@@ -102,7 +141,7 @@ func main() {
 		if !valid_auth {
 			w.Header().Add("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("{\"returncode\": 401, \"stderr\": \"Unauthorized\", \"stdout\": \"\"}"))
+			w.Write(getErrorBytes(http.StatusUnauthorized, "Unauthorized"))
 			return
 		}
 
@@ -116,16 +155,83 @@ func main() {
 					c == '>' || c == '/' || c == ';' || c == ':' {
 					w.Header().Add("Content-Type", "application/json; charset=utf-8")
 					w.WriteHeader(http.StatusBadRequest)
-					w.Write([]byte("{\"returncode\": 400, \"stderr\": \"Bad request\", \"stdout\": \"\"}"))
+					w.Write(getErrorBytes(http.StatusBadRequest, "Bad request"))
 					return
 				}
 			}
 		}
 
-		w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-		w.Write([]byte("HostName = " + params["host_name"] + "\n" +
-			"ServiceName = " + params["service_name"] + "\n" +
-			"ActionName = " + params["action_name"]))
+		var hostConfig *HostConfig
+
+		for _, v := range hostsData {
+			if v.Name == params["host_name"] {
+				hostConfig = &v
+				break
+			}
+		}
+
+		if hostConfig == nil {
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(getErrorBytes(http.StatusBadRequest, "Bad request"))
+			return
+		}
+
+		cmd, err := remoteBash(params["host_name"], "cat "+hostConfig.Services+"/"+params["service_name"]+"/mypli.yml")
+
+		if err != nil {
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(getErrorBytes(http.StatusInternalServerError, "Internal server error"))
+			log.Printf("error: %s\n", err.Error())
+			return
+		}
+
+		var commands map[string][]string
+
+		if err := yaml.Unmarshal(cmd.Stdout, &commands); err != nil {
+			if err != nil {
+				w.Header().Add("Content-Type", "application/json; charset=utf-8")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write(getErrorBytes(http.StatusInternalServerError, "Internal server error"))
+				log.Printf("error: %s\n", err.Error())
+				return
+			}
+		}
+
+		actionArray, actionFound := commands[params["action_name"]]
+
+		if !actionFound {
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(getErrorBytes(http.StatusInternalServerError, "Internal server error"))
+			log.Printf("error: Action not found")
+		}
+
+		cmd, err = remoteBash(params["host_name"], "cd "+hostConfig.Services+"/"+params["service_name"]+" || exit 1\n"+strings.Join(actionArray, " && "))
+
+		if err != nil && !strings.HasPrefix(err.Error(), "exit status") {
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.Write(getErrorBytes(http.StatusInternalServerError, "Internal server error"))
+			log.Printf("error: %v", err)
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		rc := cmd.Command.ProcessState.ExitCode()
+
+		if rc == 0 {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		apiResult := APIResult{}
+		apiResult.ReturnCode = rc
+		apiResult.Stdout = string(cmd.Stdout)
+		apiResult.Stderr = string(cmd.Stderr)
+		apiResultBytes, _ := json.Marshal(apiResult)
+		w.WriteHeader(http.StatusOK)
+		w.Write(apiResultBytes)
 	}).Methods("GET")
 
 	cancelChan := make(chan os.Signal, 1)
