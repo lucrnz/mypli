@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: .
-    restart: always
+    restart: unless-stopped
     environment:
       - PORT=${PORT}
       - SECRET_KEY=${SECRET_KEY}
