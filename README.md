@@ -1,6 +1,8 @@
 ## mypli
 🚀  API for automatic remote deployment
 
+[Write up](https://lucdev.net/blog/deployment-tool)
+
 ## Routes
 
 | Route | Method | Description
