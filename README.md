@@ -9,6 +9,8 @@
 | --- | --- | --- |
 | `/{host_name}/{service_name}/{action_name}` | `GET` | This triggers the action `action_name` on the service `service_name`, at the server `host_name`. |
 
+*Note:* Any parameter passed in the query string will be passed to the action as a variable. Read more about it below.
+
 ## Response
 
 ```json
@@ -52,6 +54,17 @@ deploy:
 In this case you can replace `pull` with any `action_name`, any command on the list **depends that former command executed correctly**. Any error will stop the pipeline.
 
 You may define as many actions as you need.
+
+*Variables*
+
+You can now define variables in your `mypli.yml` file, for example:
+
+```yaml
+pull:
+  - git pull origin %var=branch%
+```
+
+These variables are loaded from the Query parameters of the request. Make sure to define them in the request, otherwise the command will run with unexcepted results.
 
 ## Set-up and configuration
 
