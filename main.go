@@ -199,7 +199,7 @@ func main() {
 			}
 		}
 
-		actionArray, actionFound := commands[params["action_name"]]
+		rawSteps, actionFound := commands[params["action_name"]]
 
 		if !actionFound {
 			w.Header().Add("Content-Type", "application/json; charset=utf-8")
@@ -208,7 +208,17 @@ func main() {
 			log.Printf("error: Action not found")
 		}
 
-		cmd, err = remoteBash(params["host_name"], "cd "+hostConfig.Services+"/"+params["service_name"]+" || exit 1\n"+strings.Join(actionArray, " && "))
+		steps := make([]string, len(rawSteps))
+
+		for i, step := range rawSteps {
+			replacedStep := step
+			for key, values := range r.URL.Query() {
+				replacedStep = strings.Replace(replacedStep, "%var="+key+"%", strings.Join(values, " "), -1)
+			}
+			steps[i] = replacedStep
+		}
+
+		cmd, err = remoteBash(params["host_name"], "cd "+hostConfig.Services+"/"+params["service_name"]+" || exit 1\n"+strings.Join(steps, " && "))
 
 		if err != nil && !strings.HasPrefix(err.Error(), "exit status") {
 			w.Header().Add("Content-Type", "application/json; charset=utf-8")
