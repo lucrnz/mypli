@@ -97,7 +97,7 @@ We need to generate the known_hosts file, for every domain the API will connect:
 If the above commands don't work for some reason, then try connecting using:
 
 	chmod 600 cfg/key
-	ssh user@yourhost -P 3050 -i cfg/key
+	ssh -i cfg/key user@yourhost -p 3050 
 
 Then copy your `known_hosts`:
 
